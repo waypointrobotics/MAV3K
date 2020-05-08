@@ -1,0 +1,36 @@
+<?xml version="1.0" ?>
+<sdf version="1.5">
+  <model name="vector_dev_floor">
+    <static>true</static>
+    <link name="link">
+      <inertial>
+	      <pose>0 0 0 0 0 0</pose>
+	      <inertia>
+	      <ixx>2500.0</ixx>
+	      <ixy>0</ixy>
+	      <ixz>0</ixz>
+	      <iyy>2500.0</iyy>
+	      <iyz>0</iyz>
+	      <izz>2500.0</izz>
+	      </inertia>
+	      <mass>10000000.0</mass>
+      </inertial>
+
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>model://google_floor/meshes/vector_dev_floor.dae</uri>
+          </mesh>
+        </geometry>
+      </collision>
+
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://google_floor/meshes/vector_dev_floor.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+  </model>
+</sdf>

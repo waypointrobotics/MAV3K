@@ -1,0 +1,47 @@
+#!/bin/bash          
+#
+# Script to delay the launch of a roslaunch file until another node is available
+#
+#
+# Use: ./node_delay_roslaunch [name of node to wait for] [rospkg] [roslaunch file] [arguments (optional)]
+#
+
+function showHelp(){
+    echo 
+    echo "This script can delay the launch of a roslaunch file"
+    echo "Place it in the 'scripts' folder of your catkin package"
+    echo "and make sure that the file is executable (chmod +x node_delay_roslaunch)"
+    echo 
+    echo "Use: rosrun si_utils node_delay_roslaunch [name of node to wait for] [rospkg] [roslaunch file] [arguments (optional)]"
+    echo 
+    echo "Or run it from another roslaunch file:"
+    echo 
+    echo '<launch>'
+    echo '  <node pkg="si_utils" type="node_delay_roslaunch"'
+    echo '    args="/ur_driver segway_bringup segway_moveit.launch"'
+    echo '    name="move_it_bringup" output="screen">'
+    echo '  </node>'
+    echo '</launch>'
+}
+
+if [ "$1" = "-h" ]; then
+    showHelp
+else
+
+    result=$(rosnode list | grep "$1")
+    while [ "$result" != "$1" ]; do
+        result=$(rosnode list | grep "$1")
+        if [ "$result" != "$1" ]; then
+            sleep 1
+        fi
+    done  
+
+    if [ "$result" != "$1" ]; then
+        echo "Node $1 did not start."
+    else
+        echo "Successfully found node $1."
+        shift
+            echo "now running 'roslaunch $@'"
+        roslaunch $@ 
+    fi
+fi

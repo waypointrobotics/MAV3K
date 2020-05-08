@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<launch>
+
+    <node pkg="ira_laser_tools" name="laserscan_multi_merger" type="laserscan_multi_merger" output="screen">
+        <param name="destination_frame" value="base_laser_link"/>
+        <param name="fixed_frame" value="base_chassis_link"/>
+        <param name="cloud_destination_topic" value="/vector/merged_cloud"/>
+        <param name="scan_destination_topic" value="/vector/combined_scan"/>
+        <param name="laserscan_topics" value ="/vector/front_scan /vector/rear_scan"/>
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="laser_scan_to_pcl2_manager" args="manager" />
+    <node name="laser_scan_to_pcl2" pkg="nodelet" type="nodelet" args="load laserscan_to_pcl2/LaserScanToPCL2Nodelet laser_scan_to_pcl2_manager">
+        <remap from="scan" to="/vector/combined_scan"/>
+        <remap from="points2" to="/vector/combined_scan_points2"/>
+    </node>
+    
+    <node pkg="nodelet" type="nodelet" name="laser_scan_radius_filter" args="load pcl/RadiusOutlierRemoval laser_scan_to_pcl2_manager">
+        <remap from="~input" to="/vector/combined_scan_points2" />
+        <remap from="~output" to="/vector/semi_filtered_combined_scan_points2" />
+        <rosparam>radius_search: 0.3</rosparam>
+        <rosparam>min_neighbors_in_radius: 5</rosparam>
+    </node>
+
+    <node pkg="nodelet" type="nodelet" name="crop_box_filter_2d" 
+        args="load pcl/CropBox laser_scan_to_pcl2_manager" output="screen">
+        <remap from="~input" to="/vector/semi_filtered_combined_scan_points2" />
+        <remap from="~output" to="/vector/filtered_combined_scan_points2" />
+        <rosparam>
+          min_x: -0.836
+          max_x:  0.836
+          min_y: -0.594
+          max_y:  0.594
+          min_z: -0.35
+          max_z:  0.35
+          negative: True
+        </rosparam>
+    </node>
+    
+    <node pkg="nodelet" type="nodelet" name="laser_pointcloud_to_laserscan" args="load pointcloud_to_laserscan/pointcloud_to_laserscan_nodelet laser_scan_to_pcl2_manager">
+        <remap from="cloud_in" to="/vector/filtered_combined_scan_points2"/>
+        <remap from="scan" to="/vector/base_scan_filtered"/>
+        <rosparam>
+            target_frame: base_laser_link # Leave disabled to output scan in pointcloud frame
+            transform_tolerance: 0.01
+            min_height: 0.0
+            max_height: 2.0
+
+            angle_min: -3.14
+            angle_max: 3.14
+            angle_increment: 0.005759587
+            scan_time: 0.066666667
+            range_min: 0.1
+            range_max: 25.0
+            use_inf: true
+            inf_epsilon: 1.0
+
+            # Concurrency level, affects number of pointclouds queued for processing and number of threads used
+            # 0 : Detect number of cores
+            # 1 : Single threaded
+            # 2->inf : Parallelism level
+            concurrency_level: 1
+        </rosparam>
+    </node>
+    
+</launch>

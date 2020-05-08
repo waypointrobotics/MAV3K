@@ -1,0 +1,16 @@
+<package>
+    <name>mav3k_sensor_filters</name>
+    <version>0.0.1</version>
+    <description>Sensor filter metapackage for Vector</description>
+    <maintainer email="dev@waypointrobotics.com">DEVELOPER</maintainer>
+    <author>DEVELOPER</author>
+    <url type="repository">https://github.com/waypoint_robotics</url>
+    <license>BSD</license>
+    
+    <buildtool_depend>catkin</buildtool_depend>
+    <run_depend>range_sensor_filters</run_depend>
+
+    <export>
+        <metapackage/>
+    </export>
+</package>
